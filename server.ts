@@ -62,35 +62,39 @@ async function startServer() {
     res.json(null); // Return null if not in cache, client will handle generation
   });
 
-  app.post("/api/content/:slug", (req, res) => {
-    const { slug } = req.params;
-    const data = req.body;
-    
-    try {
-      db.prepare(`
-        INSERT OR REPLACE INTO content_cache (id, title, content, schema_codes, case_studies, faqs)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).run(
-        slug,
-        data.title,
-        data.content,
-        JSON.stringify(data.schema_codes || []),
-        JSON.stringify(data.case_studies || []),
-        JSON.stringify(data.faqs || [])
-      );
-      res.json({ status: "ok" });
-    } catch (error) {
-      res.status(500).json({ error: "Cache save failed" });
+  app.get("/api/content/:slug", async (req, res) => {
+  const { slug } = req.params;
+  
+  try {
+    const cached = db.prepare("SELECT * FROM content_cache WHERE id = ?").get(slug) as any;
+    if (cached) {
+      return res.json({
+        ...cached,
+        schema_codes: JSON.parse(cached.schema_codes || "[]"),
+        case_studies: JSON.parse(cached.case_studies || "[]"),
+        faqs: JSON.parse(cached.faqs || "[]")
+      });
     }
-  });
+  } catch (err) {
+    console.error("Content cache error:", err);
+  }
+  
+  res.json(null); // Hata olsa da null dön, client AI generate etsin
+});
 
   // Blog Endpoints
   app.get("/api/blog/:category/:slug", async (req, res) => {
-    const { slug } = req.params;
+  const { slug } = req.params;
+  
+  try {
     const cached = db.prepare("SELECT * FROM blog_posts WHERE slug = ?").get(slug) as any;
     if (cached) return res.json(cached);
-    res.json(null);
-  });
+  } catch (err) {
+    console.error("Blog cache error:", err);
+  }
+  
+  res.json(null);
+});
 
   app.post("/api/blog/:category/:slug", (req, res) => {
     const { slug, category } = req.params;
