@@ -1,0 +1,7 @@
+{
+  "name": "Mir Elektrik Proje Ofisi - Bursa Yetkili Elektrik Firması",
+  "description": "Bursa ve çevre illerde (Balıkesir, Çanakkale, Yalova) profesyonel elektrik uygulama, ruhsat, abone ve güç arttırımı projeleri ile teknik danışmanlık hizmetleri sunan yetkili proje ofisi.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
