@@ -111,15 +111,15 @@ async function startServer() {
     res.json(regs);
   });
 
-  app.post("/api/regulations", (req, res) => {
-    const { name, source_url } = req.body;
-    try {
-      db.prepare("INSERT INTO regulations (name, source_url) VALUES (?, ?)").run(name, source_url);
-      res.json({ status: "ok" });
-    } catch (error) {
-      res.status(500).json({ error: "Regulation save failed" });
-    }
-  });
+  app.get("/api/regulations", (req, res) => {
+  try {
+    const regs = db.prepare("SELECT * FROM regulations ORDER BY created_at DESC").all();
+    res.json(regs);
+  } catch (err) {
+    console.error("Regulations DB error:", err);
+    res.json([]); // Boş dizi dön, frontend çökmesin
+  }
+});
 
   app.delete("/api/regulations/:id", (req, res) => {
     const { id } = req.params;
